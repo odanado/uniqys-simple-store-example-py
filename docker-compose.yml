@@ -1,0 +1,19 @@
+version: "3"
+services:
+  uniqys-node:
+    build:
+      context: server/uniqys-node
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      UNIQYS_APP_URL: "http://app:56080"
+    volumes:
+      - ./server/uniqys-node:/app
+
+  app:
+    build:
+      context: server/app
+      dockerfile: Dockerfile
+    environment:
+      MEMCACHED_HOST: uniqys-node
