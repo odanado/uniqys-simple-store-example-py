@@ -30,6 +30,7 @@ def set():
     if sender is None:
         return ('error', 400)
 
+    print(request.environ['wsgi.input'].read().decode('utf8'), flush=True)
     value = request.json.get('value')
     print(value, flush=True)
     db.set('value', str(value))
@@ -41,7 +42,8 @@ def get():
 
 mount('/api', app)
 
-run(host='0.0.0.0',
+run(server='gunicorn',
+    host='0.0.0.0',
     port=56080,
     debug=True,
     reloader=True)
