@@ -1,6 +1,6 @@
 import os
 
-from bottle import request, route, run
+from bottle import Bottle, request, mount, run
 from pymemcache.client import Client
 
 PORT = os.environ.get('PORT',  56080)
@@ -12,29 +12,36 @@ db = Client(
     (MEMCACHED_HOST, int(MEMCACHED_PORT)),
 )
 
+app = Bottle()
+
 
 def get_sender():
     return request.get_header("uniqys-sender")
 
 
-@route('/hello')
+@app.route('/hello')
 def hello():
     return 'Hello Uniqys!'
 
 
-@route('/set/:value', method='POST')
-def set(value):
+@app.route('/set', method='POST')
+def set():
     sender = get_sender()
     if sender is None:
         return ('error', 400)
 
+    value = request.json.get('value')
+    print(value, flush=True)
     db.set('value', str(value))
 
 
-@route('/get')
+@app.route('/get')
 def get():
     return db.get('value')
 
+mount('/api', app)
 
 run(host='0.0.0.0',
-    port=56080)
+    port=56080,
+    debug=True,
+    reloader=True)
